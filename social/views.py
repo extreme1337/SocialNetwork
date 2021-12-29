@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.forms import fields
 from django.shortcuts import render, redirect
 from django.urls.base import reverse
@@ -8,6 +9,7 @@ from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.http import HttpResponseRedirect
+from django.db.models import Q
 
 # Create your views here.
 class PostListView(LoginRequiredMixin, View):
@@ -225,3 +227,16 @@ class Dislike(LoginRequiredMixin, View):
 
         next = request.POST.get('next', '/')
         return HttpResponseRedirect(next)
+
+class UserSearch(View):
+    def get(self, request, *args, **kwargs):
+        query = self.request.GET.get('query')
+        profile_list = UserProfile.objects.filter(
+            Q(user__username__icontains=query)
+        )
+
+        context = {
+            'profile_list': profile_list,
+        }
+
+        return render(request, 'social/search.html', context)
