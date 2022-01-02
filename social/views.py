@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponse
 from django.db.models import Q
+from django.contrib import messages
 
 # Create your views here.
 class PostListView(LoginRequiredMixin, View):
@@ -414,6 +415,7 @@ class CreateThread(View):
 
                 return redirect('thread', pk=thread.pk)
         except:
+            messages.error(request, "Invalid username")
             return redirect('create-thread')
 
 class ThreadView(View):
@@ -431,19 +433,34 @@ class ThreadView(View):
 
 class CreateMessage(View):
     def post(self, request, pk, *args, **kwargs):
+        form = MessageForm(request.POST, request.FILES)
         thread = ThreadModel.objects.get(pk=pk)
         if thread.receiver == request.user:
             receiver = thread.user
         else:
             receiver = thread.receiver
 
-        message = MessageModel(
-            thread = thread,
-            sender_user = request.user,
-            receiver_user = receiver,
-            body = request.POST.get('message'),
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.thread = thread
+            message.sender_user = request.user
+            message.receiver_user = receiver
+            message.save()
+
+        notification = Notification.objects.create(
+            notification_type=4,
+            from_user=request.user,
+            to_user=receiver,
+            thread=thread,
         )
-
-        message.save()
-
         return redirect('thread', pk=pk)
+
+class ThreadNotification(View):
+    def get(self, request, notification_pk, object_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        thread = ThreadModel.objects.get(pk=object_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect('thread', pk=object_pk)
