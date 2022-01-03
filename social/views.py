@@ -4,7 +4,7 @@ from django.forms import fields
 from django.shortcuts import render, redirect
 from django.urls.base import reverse
 from django.views import View
-from .models import MessageModel, Notification, Post, Comment, ThreadModel, UserProfile
+from .models import Image, MessageModel, Notification, Post, Comment, ThreadModel, UserProfile
 from .forms import MessageForm, PostForm, CommentForm, ThreadForm
 from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -35,10 +35,18 @@ class PostListView(LoginRequiredMixin, View):
             author__profile__followers__in=[logged_in_user.id]
         ).order_by('-created_on')        
         form = PostForm(request.POST, request.FILES)
+        files = request.FILES.getList('image')
 
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.author = request.user
+            new_post.save()
+
+            for f in files:
+                img = Image(image=f)
+                img.save()
+                new_post.image.add(img)
+            
             new_post.save()
 
         context = {
