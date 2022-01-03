@@ -8,12 +8,18 @@ from django.dispatch import receiver
 
 # Create your models here.
 class Post(models.Model):
+    shared_body = models.TextField(blank=True, null=True)
+    shared_on = models.DateTimeField(blank=True, null=True)
+    shared_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='+')
     body = models.TextField()
     image = models.ManyToManyField('Image', blank=True)
     created_on = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     likes = models.ManyToManyField(User, blank=True, related_name='likes')
     dislikes = models.ManyToManyField(User, blank=True, related_name='dislikes')
+
+    class Meta:
+        ordering = ['-created_on', '-shared_on']
 
 class Comment(models.Model):
     comment = models.TextField()
