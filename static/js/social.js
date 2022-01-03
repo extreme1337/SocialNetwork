@@ -60,3 +60,26 @@ function shareToggle(parent_id){
         row.classList.add('d-none');
     }
 }
+
+window.onload = function (){
+    const elements = document.getElementsByClassName('body');
+
+    for(let i=0; i<elements.length; i++){
+        let bodyText = elements[i].children[0].innerText;
+
+        let words = bodyText.split(' ');
+        console.log(words)
+       
+        for (let j = 0; j<words.length; j++){
+            if (words[j].startsWith("#")){
+                console.log(words[j])
+                let replacedText = bodyText.replace(/\#(.*?)(\s|$)/g, ` <a href="#">${words[j]}</a> `);
+                console.log(replacedText)
+                elements[i].innerHTML = replacedText
+            }else{
+                console.log(words[j])
+            }
+        }
+    }
+
+}

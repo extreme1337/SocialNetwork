@@ -38,13 +38,15 @@ class PostListView(LoginRequiredMixin, View):
             author__profile__followers__in=[logged_in_user.id]
         )      
         form = PostForm(request.POST, request.FILES)
-        files = request.FILES.getList('image')
+        files = request.FILES.getlist('image')
         shared_form = SharedForm()
 
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.author = request.user
             new_post.save()
+
+            new_post.create_tags()
 
             for f in files:
                 img = Image(image=f)
@@ -83,6 +85,8 @@ class PostDetailView(LoginRequiredMixin, View):
             new_commnet.author = request.user
             new_commnet.post = post
             new_commnet.save()
+
+            new_commnet.create_tags()
 
         comments = Comment.objects.filter(post=post).order_by('-created_on')
         notification = Notification.objects.create(notification_type=2, from_user=request.user, to_user=post.author, post=post)
