@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateMessage, PostListView, PostNotification, FollowNotification, AddCommentDislike, CreateThread, ListThreads, CommentReplyView, AddCommentLike, RemoveNotification, ListFollowers, PostDetailView, PostEditView, PostDeleteView, CommentDeleteView, ProfileView, ProfileEditView, AddFollower, RemoveFollower, AddLike, Dislike, SharedPostView, ThreadNotification, ThreadView, UserSearch
+from .views import CreateMessage, Explore, PostListView, PostNotification, FollowNotification, AddCommentDislike, CreateThread, ListThreads, CommentReplyView, AddCommentLike, RemoveNotification, ListFollowers, PostDetailView, PostEditView, PostDeleteView, CommentDeleteView, ProfileView, ProfileEditView, AddFollower, RemoveFollower, AddLike, Dislike, SharedPostView, ThreadNotification, ThreadView, UserSearch
 
 urlpatterns = [
     path('', PostListView.as_view(), name='post-list'),
@@ -27,4 +27,5 @@ urlpatterns = [
     path('inbox/<int:pk>/', ThreadView.as_view(), name='thread'),
     path('inbox/<int:pk>/create-message/', CreateMessage.as_view(), name='create-message'),
     path('post/<int:pk>/share/', SharedPostView.as_view(), name='share-post'),
+    path('explore', Explore.as_view(), name='explore')
 ]

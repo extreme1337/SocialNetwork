@@ -68,16 +68,11 @@ window.onload = function (){
         let bodyText = elements[i].children[0].innerText;
 
         let words = bodyText.split(' ');
-        console.log(words)
        
         for (let j = 0; j<words.length; j++){
             if (words[j].startsWith("#")){
-                console.log(words[j])
-                let replacedText = bodyText.replace(/\#(.*?)(\s|$)/g, ` <a href="#">${words[j]}</a> `);
-                console.log(replacedText)
+                let replacedText = bodyText.replace(/\#(.*?)(\s|$)/g, ` <a href="/social/explore?query=${words[j].substring(1)}">${words[j]}</a> `);
                 elements[i].innerHTML = replacedText
-            }else{
-                console.log(words[j])
             }
         }
     }

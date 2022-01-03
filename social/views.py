@@ -5,8 +5,8 @@ from django.shortcuts import render, redirect
 from django.urls.base import reverse
 from django.utils import timezone
 from django.views import View
-from .models import Image, MessageModel, Notification, Post, Comment, ThreadModel, UserProfile
-from .forms import MessageForm, PostForm, CommentForm, SharedForm, ThreadForm
+from .models import Image, MessageModel, Notification, Post, Comment, Tag, ThreadModel, UserProfile
+from .forms import ExploreForm, MessageForm, PostForm, CommentForm, SharedForm, ThreadForm
 from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
@@ -503,3 +503,44 @@ class SharedPostView(View):
             new_post.save()
 
         return redirect('post-list')
+
+class Explore(View):
+    def get(self, request, *args, **kwargs):
+        explore_form = ExploreForm()
+        query = self.request.GET.get('query')
+        tag = Tag.objects.filter(name=query).first()
+
+        if tag:
+            posts = Post.objects.filter(tags__in=[tag])
+        else:
+            posts = Post.objects.all()
+
+        context = {
+            'tag': tag,
+            'posts': posts,
+            'explore_form': explore_form,
+        }
+
+        return render(request, 'social/explore.html', context)
+
+    def post(self, request, *args, **kwargs):
+        explore_form = ExploreForm(request.POST)
+        if explore_form.is_valid():
+            query = explore_form.cleaned_data['query']
+            tag = Tag.objects.filter(name=query).first()
+
+            posts = None
+            if tag:
+                posts = Post.objects.filter(tags__in=[tag])
+
+            if posts:
+                context = {
+                    'tag': tag,
+                    'posts': posts,
+                }
+            else:
+                context = {
+                    'tag': tag,
+                }
+            return HttpResponseRedirect(f'/social/explore?query={query}')
+        return HttpResponseRedirect('/social/explore')
